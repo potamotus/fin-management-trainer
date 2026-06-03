@@ -105,7 +105,19 @@
   .intro b{color:var(--txt)}
   .secthead{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:18px 0 8px;font-weight:600}
   .toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-  @media(max-width:600px){.inrow label{min-width:100%}.fx{font-size:13.5px}}
+  @media(max-width:600px){
+    .inrow label{min-width:100%}
+    .fx{font-size:13.5px}
+    /* Шпаргалка: на телефоне строки в столбик, формула скроллится в своей рамке */
+    .cheat,.cheat tbody,.cheat tr,.cheat td{display:block;width:auto}
+    .cheat tr{padding:9px 2px;border-bottom:1px solid var(--line)}
+    .cheat tr:last-child{border-bottom:0}
+    .cheat td{border-bottom:0;padding:1px 0}
+    .cheat td.nm{color:var(--acc);font-size:14px;margin-bottom:2px}
+    .cheat .fmla{display:block;overflow-x:auto;max-width:100%;padding-bottom:3px}
+    .cheat .cmt{display:block;margin-left:0}
+    .cheat .vars,.cheat .xlrow{overflow-wrap:anywhere}
+  }
 </style>
 </head>
 <body>
