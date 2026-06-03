@@ -1176,9 +1176,9 @@ function resetProgress(){
    Все варианты ниже — cookieless и без персональных данных.
    Чтобы включить: впиши provider и ключ ОДНОГО блока (см. инструкцию в чате). */
 const ANALYTICS = {
-  provider: '',   // 'yandex' | 'umami' | 'plausible' | 'posthog' | '' (выключено)
+  provider: 'umami',   // 'yandex' | 'umami' | 'plausible' | 'posthog' | '' (выключено)
   yandex:   { counterId:'' },   // Яндекс.Метрика (РФ, бесплатно) - впиши номер счётчика
-  umami:    { src:'https://cloud.umami.is/script.js', websiteId:'' },
+  umami:    { src:'https://cloud.umami.is/script.js', websiteId:'fd3f5228-7473-42d6-a4d3-6c61afc3434d' },
   plausible:{ src:'https://plausible.io/js/script.manual.js', domain:'' },
   posthog:  { key:'', host:'https://eu.i.posthog.com' },
 };
@@ -1204,7 +1204,7 @@ function aLoad(){
     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<e.scripts.length;j++){if(e.scripts[j].src===r)return;}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
     window.ym(ANALYTICS.yandex.counterId,'init',{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:false});
   }
-  else if(p==='umami'){ const s=document.createElement('script'); s.async=true; s.src=ANALYTICS.umami.src; s.setAttribute('data-website-id',ANALYTICS.umami.websiteId); s.setAttribute('data-auto-track','false'); document.head.appendChild(s); }
+  else if(p==='umami'){ const s=document.createElement('script'); s.async=true; s.src=ANALYTICS.umami.src; s.setAttribute('data-website-id',ANALYTICS.umami.websiteId); document.head.appendChild(s); }
   else if(p==='plausible'){ const s=document.createElement('script'); s.async=true; s.defer=true; s.src=ANALYTICS.plausible.src; s.setAttribute('data-domain',ANALYTICS.plausible.domain); document.head.appendChild(s); }
   else if(p==='posthog'){ const s=document.createElement('script'); s.async=true; s.src=ANALYTICS.posthog.host+'/static/array.js'; s.onload=()=>{try{window.posthog.init(ANALYTICS.posthog.key,{api_host:ANALYTICS.posthog.host,autocapture:false,capture_pageview:false,persistence:'memory'});}catch(e){}}; document.head.appendChild(s); }
   A_DRAINER=setInterval(aDrain,1500);
