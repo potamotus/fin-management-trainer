@@ -844,13 +844,20 @@ let state = {
 };
 const RAND_N = 10;        // размер случайной выборки в базовом режиме
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function loadQuizState(){try{return JSON.parse(localStorage.getItem('fmtrain_quiz')||'{}')}catch(e){return {}}}
+function saveQuizState(){const m=loadQuizState();m[state.topic]={filter:state.quizFilter,order:state.quizOrder};localStorage.setItem('fmtrain_quiz',JSON.stringify(m));}
 function buildQuizOrder(){
   const quiz=DATA[state.topic].quiz;
   let idx=quiz.map((q,i)=>i);
   if(state.quizFilter!=='__rand' && state.quizFilter!=='__all') idx=idx.filter(i=>quiz[i].cat===state.quizFilter);
   idx=shuffle(idx);
   if(state.quizFilter==='__rand') idx=idx.slice(0,RAND_N);
-  state.quizOrder=idx;
+  state.quizOrder=idx; saveQuizState();
+}
+function restoreQuizOrder(){
+  const quiz=DATA[state.topic].quiz, m=loadQuizState()[state.topic];
+  if(m && Array.isArray(m.order) && m.order.length && m.order.every(i=>i<quiz.length)){ state.quizFilter=m.filter||'__rand'; state.quizOrder=m.order; }
+  else { state.quizFilter='__rand'; buildQuizOrder(); }
 }
 function setQuizFilter(k){state.quizFilter=k;buildQuizOrder();scrollMem[viewKey()]=0;render();track('quiz_filter',{topic:state.topic,filter:k});}
 function reshuffleQuiz(){buildQuizOrder();scrollMem[viewKey()]=0;render();track('quiz_reshuffle',{topic:state.topic});}
@@ -874,8 +881,8 @@ function renderTopics(){
   document.getElementById('modes').innerHTML = MODES.map(m=>
     `<button class="${m[0]===state.mode?'active':''}" onclick="setMode('${m[0]}')">${m[1]}</button>`).join('');
 }
-function setTopic(id){aFlushTime();saveScroll();state.topic=id;state.quizFilter='__rand';state.quizOrder=null;saveView();renderTopics();render();A_VIEW=viewKey();track('view',{topic:state.topic,mode:state.mode});}
-function setMode(m){aFlushTime();saveScroll();state.mode=m;if(m==='quiz')state.quizOrder=null;saveView();renderTopics();render();A_VIEW=viewKey();track('view',{topic:state.topic,mode:state.mode});}
+function setTopic(id){aFlushTime();saveScroll();state.topic=id;state.quizOrder=null;saveView();renderTopics();render();A_VIEW=viewKey();track('view',{topic:state.topic,mode:state.mode});}
+function setMode(m){aFlushTime();saveScroll();state.mode=m;saveView();renderTopics();render();A_VIEW=viewKey();track('view',{topic:state.topic,mode:state.mode});}
 
 function render(){
   const d = DATA[state.topic];
@@ -892,7 +899,7 @@ function render(){
       </div>`).join('');
   }
   else if(state.mode==='quiz'){
-    if(!state.quizOrder) buildQuizOrder();
+    if(!state.quizOrder) restoreQuizOrder();
     html += quizControls();
     html += state.quizOrder.map((i,pos)=>quizHTML(d.quiz[i],i,pos)).join('');
     if(!state.quizOrder.length) html += `<div class="qhint">В этой подтеме пока нет вопросов.</div>`;
