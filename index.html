@@ -1155,7 +1155,9 @@ let state = {
   quizOrder: null         // массив индексов вопросов, показываемых сейчас
 };
 const RAND_N = 10;        // размер случайной выборки в базовом режиме
+let optOrders = {};       // перемешанный порядок вариантов: {qIndex → [origIdx,...]}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function getOptOrder(i,n){if(!optOrders[i])optOrders[i]=shuffle(Array.from({length:n},(_,j)=>j));return optOrders[i];}
 function loadQuizState(){try{return JSON.parse(localStorage.getItem('fmtrain_quiz')||'{}')}catch(e){return {}}}
 function saveQuizState(){const m=loadQuizState();m[state.topic]={filter:state.quizFilter,order:state.quizOrder};localStorage.setItem('fmtrain_quiz',JSON.stringify(m));}
 function buildQuizOrder(){
@@ -1164,7 +1166,7 @@ function buildQuizOrder(){
   if(state.quizFilter!=='__rand' && state.quizFilter!=='__all') idx=idx.filter(i=>quiz[i].cat===state.quizFilter);
   idx=shuffle(idx);
   if(state.quizFilter==='__rand') idx=idx.slice(0,RAND_N);
-  state.quizOrder=idx; saveQuizState();
+  state.quizOrder=idx; optOrders={}; saveQuizState();
 }
 function restoreQuizOrder(){
   const quiz=DATA[state.topic].quiz, m=loadQuizState()[state.topic];
@@ -1257,11 +1259,12 @@ function quizControls(){
 /* ---- Тест: один вопрос ---- */
 function quizHTML(q,i,pos){
   const st = ensure().quiz[i];
-  const opts = q.o.map((o,j)=>{
+  const order = getOptOrder(i, q.o.length);
+  const opts = order.map((origJ)=>{
     let cls='opt';
-    if(st!==undefined){ cls+=' disabled'; if(j===q.c) cls+=' correct'; else if(j===st && st!==q.c) cls+=' wrong'; }
-    const fmla = (q.fl && q.fl[j]) ? `<div class="qfmla">${tex2mml(q.fl[j])}</div>` : '';
-    return `<button class="${cls}" ${st!==undefined?'':`onclick="answer(${i},${j})"`}>${fmla}<div class="qlabel">${o}</div></button>`;
+    if(st!==undefined){ cls+=' disabled'; if(origJ===q.c) cls+=' correct'; else if(origJ===st) cls+=' wrong'; }
+    const fmla = (q.fl && q.fl[origJ]) ? `<div class="qfmla">${tex2mml(q.fl[origJ])}</div>` : '';
+    return `<button class="${cls}" ${st!==undefined?'':`onclick="answer(${i},${origJ})"`}>${fmla}<div class="qlabel">${q.o[origJ]}</div></button>`;
   }).join('');
   const badge = q.cat?`<span class="catbadge">${CATLABEL[q.cat]||q.cat}</span>`:'';
   return `<div class="q" id="q${i}">
